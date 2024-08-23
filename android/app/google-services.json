@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "936871321591",
+    "project_id": "plastictono-e26cd",
+    "storage_bucket": "plastictono-e26cd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:936871321591:android:7ceb7adaba1e6b48d418f2",
+        "android_client_info": {
+          "package_name": "com.example.plastic_tono"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQxQUOeAdAsFt3lbQs9ZTvnc6lNA5zGiA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
