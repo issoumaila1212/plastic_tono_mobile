@@ -6,6 +6,7 @@ import 'package:plastic_tono/screens/home/home_screen.dart';
 import 'package:plastic_tono/themes/images/app_images.dart';
 import '../../components/default_btn.dart';
 import '../../widgets/input.dart';
+import '../../screens/scan/depotencours_screen.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -138,7 +139,13 @@ class _ScanScreenState extends State<ScanScreen> {
                     text: 'Valider',
                     btnColor: AppColors.deepGreen,
                     onPress: () {
-                      // Logique de validation du code kiosque
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              DepotencoursScreen(), // Naviguer vers la page "Dépôt en cours"
+                        ),
+                      );
                     },
                   ),
                 ],

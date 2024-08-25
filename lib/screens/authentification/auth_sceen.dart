@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:plastic_tono/screens/authentification/register_screen.dart'; // Assurez-vous que ce chemin est correct
 import 'package:plastic_tono/themes/color/app_colors.dart';
 import 'package:plastic_tono/themes/images/app_images.dart';
 
@@ -18,7 +19,6 @@ class _AuthSceenState extends State<AuthSceen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
 
@@ -34,10 +34,7 @@ class _AuthSceenState extends State<AuthSceen> {
               children: [
                 Container(
                   height: 250,
-                  decoration: BoxDecoration(
-                    //shape: BoxShape.circle,
-                    color: const Color.fromRGBO(255, 255, 255, 1),
-                  ),
+                  color: AppColors.white,
                   child: Image.asset(
                     AppImages.logo,
                     width: 200,
@@ -48,84 +45,92 @@ class _AuthSceenState extends State<AuthSceen> {
                   child: Container(
                     width: double.infinity,
                     color: AppColors.deepGreen,
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 20),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 5, horizontal: 10),
+                        Center(
                           child: Text(
                             "Connexion",
                             style: TextStyle(
-                                color: AppColors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold),
+                              color: AppColors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
+                        const SizedBox(height: 20),
                         input(
                           phoneCtrl: phoneCtrl,
                           icon: Icons.phone,
-                          hintText: "Numero de telephone",
+                          hintText: "Numéro de téléphone",
                         ),
+                        const SizedBox(
+                            height: 10), // Espace entre les champs de saisie
                         input(
                           phoneCtrl: passwordCtrl,
-                          icon: Icons.key,
+                          icon: Icons.lock,
                           hintText: "Mot de passe",
                           isPassword: true,
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Se souvenir de moi",
-                                style: TextStyle(
-                                  color: AppColors.white,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              Text(
-                                "Mot de passe Oublié",
-                                style: TextStyle(
-                                    color: AppColors.white,
-                                    fontSize: 13,
-                                    decoration: TextDecoration.underline),
-                              ),
-                            ],
+                        const SizedBox(height: 10),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            "Mot de passe oublié?",
+                            style: TextStyle(
+                              color: AppColors.white,
+                              fontSize: 13,
+                              decoration: TextDecoration.underline,
+                            ),
                           ),
                         ),
-                        //Btn
-                        const SizedBox(
-                          height: 10,
+                        const SizedBox(height: 20),
+                        Center(
+                          child: defaultBtn(
+                            text: "Se connecter",
+                            btnColor: Colors.orange,
+                            onPress: () {
+                              // Ajoutez votre logique de connexion ici
+                            },
+                          ),
                         ),
-                        defaultBtn(
-                          text: "Connexion",
-                          btnColor: AppColors.white,
-                        ),
-
-                        //
-                        Padding(
-                          padding: const EdgeInsets.all(5.0),
+                        const SizedBox(height: 20),
+                        Center(
                           child: Text.rich(
                             TextSpan(
-                                style: TextStyle(
-                                  color: AppColors.white,
-                                  fontSize: 12,
-                                ),
-                                text: "Vous n'avez pas de compte ",
-                                children: [
-                                  TextSpan(
-                                    text: "Creer un compte".toUpperCase(),
-                                    style: TextStyle(
-                                        color: AppColors.white,
+                              style: TextStyle(
+                                color: AppColors.white,
+                                fontSize: 12,
+                              ),
+                              text: "Vous n'avez pas de compte ? ",
+                              children: [
+                                WidgetSpan(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      // Naviguer vers RegisterScreen
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const RegisterScreen()),
+                                      );
+                                    },
+                                    child: Text(
+                                      "Créer un compte",
+                                      style: TextStyle(
+                                        color: Colors.orange,
                                         fontSize: 13,
-                                        fontWeight: FontWeight.w600),
-                                  )
-                                ]),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),
