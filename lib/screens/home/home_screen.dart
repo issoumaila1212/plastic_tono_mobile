@@ -153,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     label: 'Commencer un dépôt',
                     icon: Icons.center_focus_weak,
                     color: AppColors.deepGreen,
-                    iconColor: AppColors.orange,
+                    iconColor: AppColors.deepGreen,
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
@@ -167,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     label: 'Historique des dépôts',
                     icon: Icons.history,
                     color: Colors.orange,
-                    iconColor: AppColors.deepGreen,
+                    iconColor: AppColors.orange,
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
@@ -181,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     label: 'Voir mes points',
                     icon: Icons.monetization_on,
                     color: Colors.orange,
-                    iconColor: AppColors.deepGreen,
+                    iconColor: AppColors.orange,
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
@@ -195,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     label: 'Historique des transactions',
                     icon: Icons.archive,
                     color: AppColors.deepGreen,
-                    iconColor: AppColors.orange,
+                    iconColor: AppColors.deepGreen,
                     onPressed: () {
                       Navigator.pushReplacement(
                           context,
@@ -208,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     label: 'Localiser nos kiosques',
                     icon: Icons.location_on,
                     color: AppColors.deepGreen,
-                    iconColor: AppColors.orange,
+                    iconColor: AppColors.deepGreen,
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
@@ -222,7 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     label: 'Suggestions',
                     icon: Icons.feedback,
                     color: Colors.orange,
-                    iconColor: AppColors.deepGreen,
+                    iconColor: AppColors.orange,
                     onPressed: () {
                       Navigator.push(
                         context,
