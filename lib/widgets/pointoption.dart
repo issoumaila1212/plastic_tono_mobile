@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:plastic_tono/themes/color/app_colors.dart';
 import 'package:plastic_tono/screens/point/convertpoint_screen.dart';
+import 'package:plastic_tono/screens/point/points_details_screen.dart';
 
 class PointsOptions extends StatelessWidget {
   const PointsOptions({super.key});
@@ -82,7 +83,12 @@ class PointsOptions extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                     onPressed: () {
-                      // Logique pour afficher les détails des points
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PointsDetailsScreen(),
+                        ),
+                      );
                     },
                     child: Column(
                       mainAxisSize:

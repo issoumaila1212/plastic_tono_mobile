@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:plastic_tono/screens/Historique/transactionhistory_screen.dart';
+import 'package:plastic_tono/screens/localisation/localisation_kiosque.dart';
 import 'package:plastic_tono/themes/color/app_colors.dart';
 import 'package:plastic_tono/themes/images/app_images.dart';
 import 'package:plastic_tono/widgets/mainmenubutton.dart';
@@ -7,6 +8,9 @@ import 'package:plastic_tono/widgets/mainmenubuttono.dart';
 import 'package:plastic_tono/screens/scan/scan_screen.dart';
 import 'package:plastic_tono/screens/Historique/historiquedepot_screen.dart';
 import 'package:plastic_tono/screens/point/point_screen.dart';
+import 'package:plastic_tono/screens/suggestion/suggestions_screen.dart';
+import 'package:plastic_tono/screens/profil/profil_screen.dart';
+import 'package:plastic_tono/screens/notification/notification_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,11 +27,21 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: AppColors.deepGreen,
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: CircleAvatar(
-            backgroundColor: AppColors.white,
-            child: Icon(
-              Icons.notifications,
-              color: AppColors.orange,
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const NotificationsScreen(),
+                ),
+              );
+            },
+            child: CircleAvatar(
+              backgroundColor: AppColors.white,
+              child: Icon(
+                Icons.notifications,
+                color: AppColors.orange,
+              ),
             ),
           ),
         ),
@@ -36,7 +50,17 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(8.0),
             child: CircleAvatar(
               backgroundColor: Colors.white,
-              child: Icon(Icons.account_circle, color: Colors.orange),
+              child: IconButton(
+                icon: const Icon(Icons.account_circle, color: Colors.orange),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ProfileScreen(),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ],
@@ -121,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: GridView.count(
                 shrinkWrap: true,
                 crossAxisCount: 2,
-                crossAxisSpacing: 40,
+                crossAxisSpacing: 30,
                 mainAxisSpacing: 20,
                 childAspectRatio: 1.1,
                 children: [
@@ -129,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     label: 'Commencer un dépôt',
                     icon: Icons.center_focus_weak,
                     color: AppColors.deepGreen,
-                    iconColor: AppColors.deepGreen,
+                    iconColor: AppColors.orange,
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
@@ -171,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     label: 'Historique des transactions',
                     icon: Icons.archive,
                     color: AppColors.deepGreen,
-                    iconColor: AppColors.deepGreen,
+                    iconColor: AppColors.orange,
                     onPressed: () {
                       Navigator.pushReplacement(
                           context,
@@ -184,15 +208,29 @@ class _HomeScreenState extends State<HomeScreen> {
                     label: 'Localiser nos kiosques',
                     icon: Icons.location_on,
                     color: AppColors.deepGreen,
-                    iconColor: AppColors.deepGreen,
-                    onPressed: () {},
+                    iconColor: AppColors.orange,
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LocaliserKiosquesScreen(),
+                        ),
+                      );
+                    },
                   ),
                   MainMenuButtono(
                     label: 'Suggestions',
                     icon: Icons.feedback,
                     color: Colors.orange,
                     iconColor: AppColors.deepGreen,
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SuggestionsScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

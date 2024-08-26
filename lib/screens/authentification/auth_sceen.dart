@@ -92,6 +92,12 @@ class _AuthSceenState extends State<AuthSceen> {
                             text: "Se connecter",
                             btnColor: Colors.orange,
                             onPress: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const RegisterScreen()),
+                              );
                               // Ajoutez votre logique de connexion ici
                             },
                           ),

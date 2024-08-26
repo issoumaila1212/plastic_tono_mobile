@@ -29,7 +29,7 @@ class _MainMenuButtonState extends State<MainMenuButton> {
     return GestureDetector(
       onTap: widget.onPressed,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(5),
         decoration: BoxDecoration(
           color: AppColors.deepGreen,
           borderRadius: BorderRadius.circular(12),

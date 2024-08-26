@@ -44,7 +44,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     width: double.infinity,
                     color: AppColors.deepGreen,
                     padding: const EdgeInsets.symmetric(
-                      vertical: 20,
+                      vertical: 10,
                       horizontal: 20,
                     ),
                     child: Column(
@@ -96,7 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           hintText: "Mot de passe",
                           isPassword: true,
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 10),
                         Center(
                           child: defaultBtn(
                             text: "Créer un compte",

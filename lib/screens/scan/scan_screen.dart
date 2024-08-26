@@ -59,118 +59,124 @@ class _ScanScreenState extends State<ScanScreen> {
           },
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Center(
-              child: Image.asset(
-                AppImages.logo3,
-                height: 150, // Augmentation de la taille de l'image
+      body: SingleChildScrollView(
+        // Enveloppez avec SingleChildScrollView
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Center(
+                child: Image.asset(
+                  AppImages.logo3,
+                  height: 150, // Augmentation de la taille de l'image
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            // Boutons de sélection (QR code ou Code kiosque) avec `defaultBtn`
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: defaultBtn(
-                    text: 'Qr code',
-                    btnColor: showQrCode ? Colors.orange : AppColors.orange,
-                    onPress: () {
-                      setState(() {
-                        showQrCode = true;
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: defaultBtn(
-                    text: 'Code Kiosque',
-                    btnColor: showQrCode ? Colors.green : AppColors.deepGreen,
-                    onPress: () {
-                      setState(() {
-                        showQrCode =
-                            false; // Affiche le champ de saisie du code kiosque
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            // Contenu dynamique basé sur le choix
-            if (showQrCode)
-              Expanded(
-                flex: 5,
-                child: QRView(
-                  key: qrKey,
-                  onQRViewCreated: _onQRViewCreated,
-                  overlay: QrScannerOverlayShape(
-                    borderColor: Colors.green,
-                    borderRadius: 10,
-                    borderLength: 30,
-                    borderWidth: 10,
-                    cutOutSize: 300,
-                  ),
-                ),
-              )
-            else
-              Column(
+              const SizedBox(height: 16),
+              // Boutons de sélection (QR code ou Code kiosque) avec `defaultBtn`
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    'Saisissez le code du kiosque',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Expanded(
+                    child: defaultBtn(
+                      text: 'Qr code',
+                      btnColor: showQrCode ? Colors.orange : AppColors.orange,
+                      onPress: () {
+                        setState(() {
+                          showQrCode = true;
+                        });
+                      },
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  // Champ de saisie du code kiosque avec widget `input`
-                  input(
-                    phoneCtrl:
-                        TextEditingController(), // Utilisez un TextEditingController adapté
-                    icon: Icons.code,
-                    hintText: "---------",
-                  ),
-                  const SizedBox(height: 16),
-                  // Bouton de validation avec `defaultBtn`
-                  defaultBtn(
-                    text: 'Valider',
-                    btnColor: AppColors.deepGreen,
-                    onPress: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              DepotencoursScreen(), // Naviguer vers la page "Dépôt en cours"
-                        ),
-                      );
-                    },
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: defaultBtn(
+                      text: 'Code Kiosque',
+                      btnColor: showQrCode ? Colors.green : AppColors.deepGreen,
+                      onPress: () {
+                        setState(() {
+                          showQrCode =
+                              false; // Affiche le champ de saisie du code kiosque
+                        });
+                      },
+                    ),
                   ),
                 ],
               ),
-            const Spacer(),
-            // Message d'erreur ou de succès basé sur la validité du code
-            if (isCodeValid)
-              Text(
-                'Kiosque ACI00 identifié avec succès',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: AppColors.deepGreen,
-                  fontWeight: FontWeight.bold,
+              const SizedBox(height: 16),
+              // Contenu dynamique basé sur le choix
+              if (showQrCode)
+                // Utiliser un Container avec une taille fixe au lieu de `Expanded`
+                Container(
+                  height: 300,
+                  child: QRView(
+                    key: qrKey,
+                    onQRViewCreated: _onQRViewCreated,
+                    overlay: QrScannerOverlayShape(
+                      borderColor: Colors.green,
+                      borderRadius: 10,
+                      borderLength: 30,
+                      borderWidth: 10,
+                      cutOutSize: 300,
+                    ),
+                  ),
+                )
+              else
+                Column(
+                  children: [
+                    Text(
+                      'Saisissez le code du kiosque',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    // Champ de saisie du code kiosque avec widget `input`
+                    input(
+                      phoneCtrl:
+                          TextEditingController(), // Utilisez un TextEditingController adapté
+                      icon: Icons.code,
+                      hintText: "---------",
+                    ),
+                    const SizedBox(height: 16),
+                    // Bouton de validation avec `defaultBtn`
+                    defaultBtn(
+                      text: 'Valider',
+                      btnColor: AppColors.deepGreen,
+                      onPress: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                DepotencoursScreen(), // Naviguer vers la page "Dépôt en cours"
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
-              )
-            else
-              Text(
-                'Veuillez scanner le bon code',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
+              const SizedBox(
+                  height: 16), // Utiliser SizedBox à la place de Spacer
+              // Message d'erreur ou de succès basé sur la validité du code
+              if (isCodeValid)
+                Text(
+                  'Kiosque ACI00 identifié avec succès',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: AppColors.deepGreen,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              else
+                Text(
+                  'Veuillez scanner le bon code',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
