@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:plastic_tono/screens/Historique/transactionhistory_screen.dart';
+<<<<<<< Updated upstream
+=======
+import 'package:plastic_tono/screens/localisation/localisation_kiosque.dart';
+import 'package:plastic_tono/screens/point/PointsService.dart';
+>>>>>>> Stashed changes
 import 'package:plastic_tono/themes/color/app_colors.dart';
 import 'package:plastic_tono/themes/images/app_images.dart';
 import 'package:plastic_tono/widgets/mainmenubutton.dart';
@@ -16,6 +21,35 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  double availablePoints = 0;
+  bool isLoading = true;
+  String pt="";
+
+  final PointsService _pointsService = PointsService();
+  bool showConversionFields = false;
+
+  @override
+  void initState(){
+    super.initState();
+    _loadUserPoints();
+  }
+
+  Future<void> _loadUserPoints() async {
+    try{
+      double points = await _pointsService.fetchUserPoints();
+      setState(() {
+        availablePoints = points;
+        isLoading = false;
+      });
+    }catch(e){
+      setState(() {
+        availablePoints = 0;
+        isLoading = false;
+      });
+    }
+    pt = availablePoints.toStringAsFixed(2);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,12 +135,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Row(
                       children: [
                         Text(
-                          'Points: ',
+                          'Points :  ',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, color: Colors.black),
                         ),
                         Text(
-                          "1200 pts",
+                          pt != null
+                              ? '$pt'
+                              : '0',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, color: Colors.black),
                         ),

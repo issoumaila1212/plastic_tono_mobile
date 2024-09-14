@@ -1,18 +1,63 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:plastic_tono/screens/scan/SessionService.dart';
 import 'package:plastic_tono/themes/color/app_colors.dart';
 import 'package:plastic_tono/themes/images/app_images.dart';
-import '../../components/default_btn.dart'; // Assurez-vous d'importer correctement les widgets nécessaires
-import '../../widgets/infocard.dart'; // Assurez-vous d'importer votre widget InfoCard
+import '../../components/default_btn.dart';
+import '../../widgets/infocard.dart';
+import '../home/home_screen.dart';
 
 class FinDepotScreen extends StatefulWidget {
-  const FinDepotScreen({super.key});
+  final int idSession;
+
+  const FinDepotScreen({super.key, required this.idSession});
 
   @override
   _FinDepotScreenState createState() => _FinDepotScreenState();
 }
 
 class _FinDepotScreenState extends State<FinDepotScreen> {
+  int poids = 0;
+  String points = "0";
+  final SessionService _sessionService = SessionService();
+
   @override
+  void initState() {
+    super.initState();
+    _getPoidsSession();
+    _enregistrerPoints();
+
+  }
+
+  Future<void> _getPoidsSession() async {
+    try {
+      int fetchedPoids = await _sessionService.fetchPoidsSession(widget.idSession);
+      setState(() {
+        poids = fetchedPoids;
+      });
+    } catch (e) {
+      print('Erreur lors de la récupération du poids : $e');
+    }
+  }
+
+  Future<void> _enregistrerPoints() async {
+    try {
+      await _sessionService.enregistrerPoints(widget.idSession, poids);
+      print("---------------------------------------object");
+
+
+      double fetchedPoints = await _sessionService.getPoints(widget.idSession);
+      print("---------------------------------------points::::");
+      print(fetchedPoints);
+      setState(() {
+        points = fetchedPoints.toStringAsFixed(2);
+
+      });
+    } catch (e) {
+      print('Erreur lors de l\'enregistrement des points : $e');
+    }
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -80,13 +125,13 @@ class _FinDepotScreenState extends State<FinDepotScreen> {
               children: [
                 InfoCard(
                   label: 'Poids',
-                  value: '100 g',
+                  value: '$poids g',
                   backgroundColor: AppColors.deepGreen,
                 ),
                 const SizedBox(width: 16),
                 InfoCard(
                   label: 'Points',
-                  value: '10 pts',
+                  value: '$points pts',
                   backgroundColor: Colors.orange,
                 ),
               ],
@@ -98,8 +143,12 @@ class _FinDepotScreenState extends State<FinDepotScreen> {
               text: 'Terminer',
               btnColor: Colors.red,
               onPress: () {
-                Navigator.of(context).popUntil(
-                    (route) => route.isFirst); // Retourner à l'écran principal
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HomeScreen(),
+                  ),
+                ); // Retourner à l'écran principal
               },
             ),
           ],

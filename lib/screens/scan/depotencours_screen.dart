@@ -1,9 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:plastic_tono/screens/scan/SessionService.dart';
 import 'package:plastic_tono/themes/color/app_colors.dart';
 import 'package:plastic_tono/screens/scan/findepot_screen.dart';
 
 class DepotencoursScreen extends StatefulWidget {
+  final int idSession;
+  const DepotencoursScreen ({ super.key, required this.idSession });
+
+
   @override
   _DepotencoursScreenState createState() => _DepotencoursScreenState();
 }
@@ -12,7 +17,10 @@ class _DepotencoursScreenState extends State<DepotencoursScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Timer _timer;
+
   int _start = 70; // 1 minute et 10 secondes (en secondes)
+  final TextEditingController finController = TextEditingController();
+  final SessionService _sessionService = SessionService();
 
   @override
   void initState() {
@@ -38,16 +46,19 @@ class _DepotencoursScreenState extends State<DepotencoursScreen>
       }
     });
   }
-
   @override
   void dispose() {
     _controller.dispose();
     _timer.cancel();
+    finController.dispose();
     super.dispose();
   }
+  int poids = 0;
 
   @override
   Widget build(BuildContext context) {
+    int idSession=widget.idSession;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.deepGreen,
@@ -65,7 +76,6 @@ class _DepotencoursScreenState extends State<DepotencoursScreen>
       body: Stack(
         children: [
           Center(
-            // Centre le contenu de la colonne
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -81,18 +91,38 @@ class _DepotencoursScreenState extends State<DepotencoursScreen>
                   ),
                   const SizedBox(height: 50),
                   ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const FinDepotScreen(),
-                        ),
-                      );
+
+                    onPressed: () async {
+                      try {
+                        // Clôturer la session sans avoir besoin de passer un ID manuellement
+                        String result = await _sessionService.cloturerSession(idSession);
+
+                        // Afficher le message de succès
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(result),
+                          ),
+                        );
+
+                        // Naviguer vers l'écran suivant après la clôture de la session
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FinDepotScreen(idSession: idSession),
+                          ),
+                        );
+                      } catch (e) {
+                        // Afficher un message d'erreur si quelque chose tourne mal
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Erreur lors de la clôture de la session: $e"),
+                          ),
+                        );
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -102,6 +132,7 @@ class _DepotencoursScreenState extends State<DepotencoursScreen>
                       style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
+
                 ],
               ),
             ),
@@ -121,8 +152,8 @@ class _DepotencoursScreenState extends State<DepotencoursScreen>
 }
 
 class TimerCircleDisplay extends StatelessWidget {
-  final int duration; // Le temps restant en secondes
-  final double progress; // Progrès de l'animation circulaire
+  final int duration;
+  final double progress;
 
   const TimerCircleDisplay({
     Key? key,

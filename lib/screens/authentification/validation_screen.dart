@@ -1,15 +1,17 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:plastic_tono/themes/color/app_colors.dart';
-import 'package:plastic_tono/themes/images/app_images.dart';
 import '../../components/default_btn.dart';
 import '../../widgets/verificationcodeBox.dart';
-import '../../screens/authentification/success_screen.dart';
+import '../home/home_screen.dart';
 
 class ValidationScreen extends StatefulWidget {
-  const ValidationScreen({Key? key}) : super(key: key);
+  final String verificationId;
+
+  const ValidationScreen({required this.verificationId, Key? key}) : super(key: key);
 
   @override
-  State<ValidationScreen> createState() => _ValidationScreenState();
+  _ValidationScreenState createState() => _ValidationScreenState();
 }
 
 class _ValidationScreenState extends State<ValidationScreen> {
@@ -17,57 +19,49 @@ class _ValidationScreenState extends State<ValidationScreen> {
   final TextEditingController _code2 = TextEditingController();
   final TextEditingController _code3 = TextEditingController();
   final TextEditingController _code4 = TextEditingController();
+  final TextEditingController _code5 = TextEditingController();
+  final TextEditingController _code6 = TextEditingController();
 
-  bool _isLoading = false; // Variable pour gérer l'état de chargement
+  bool _isLoading = false;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Fonction pour afficher le dialogue de chargement
-  void _showLoadingDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              CircularProgressIndicator(),
-              SizedBox(height: 20),
-              Text(
-                "Vérification en cours...",
-                style: TextStyle(color: Colors.white),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+  // Fonction pour assembler le code OTP
+  String get _smsCode {
+    return _code1.text.trim() +
+        _code2.text.trim() +
+        _code3.text.trim() +
+        _code4.text.trim() +
+        _code5.text.trim() +
+        _code6.text.trim();
   }
 
-  // Simulation d'une fonction de vérification du code
-  Future<void> _verifyCode() async {
+  // Fonction pour vérifier le code OTP
+  Future<void> _verifyOTP() async {
     setState(() {
       _isLoading = true;
     });
 
-    _showLoadingDialog(context); // Affiche le dialogue de chargement
+    try {
+      PhoneAuthCredential credential = PhoneAuthProvider.credential(
+        verificationId: widget.verificationId,
+        smsCode: _smsCode,
+      );
 
-    // Simule un délai pour la vérification (par exemple, une requête réseau)
-    await Future.delayed(const Duration(seconds: 3));
+      await _auth.signInWithCredential(credential);
 
-    // Ferme le dialogue de chargement
-    Navigator.of(context).pop();
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    // Après vérification réussie, navigue vers la page de succès
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const SuccessScreen()),
-    );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Erreur lors de la vérification : ${e.toString()}")),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -87,19 +81,17 @@ class _ValidationScreenState extends State<ValidationScreen> {
                   ),
                   child: Center(
                     child: Image.asset(
-                      AppImages.logo,
+                      'assets/images/logo.png',
                       width: 200,
                       fit: BoxFit.contain,
                     ),
                   ),
                 ),
-                // Section inférieure - Vérification
                 Expanded(
                   child: Container(
                     width: double.infinity,
                     color: AppColors.deepGreen,
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 20, horizontal: 30),
+                    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
                     child: Column(
                       children: [
                         Text(
@@ -111,47 +103,30 @@ class _ValidationScreenState extends State<ValidationScreen> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        //sous titre
                         Text(
-                          "Un code de vérification a été envoyé à votre e-mail. Veuillez le saisir pour confirmer votre identité.",
+                          "Un code de vérification à 6 chiffres a été envoyé à votre numéro de téléphone. Veuillez le saisir pour confirmer votre identité.",
                           textAlign: TextAlign.center,
-                          style:
-                              TextStyle(color: AppColors.white, fontSize: 16),
+                          style: TextStyle(
+                              color: AppColors.white, fontSize: 16),
                         ),
-                        const SizedBox(height: 10),
-                        //champ de saisie de code
+                        const SizedBox(height: 20),
+                        // Les 6 champs de saisie pour l'OTP
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            VerificationCodeBox(
-                              controller: _code1,
-                              autoFocus: true,
-                            ),
+                            VerificationCodeBox(controller: _code1),
                             VerificationCodeBox(controller: _code2),
                             VerificationCodeBox(controller: _code3),
-                            VerificationCodeBox(controller: _code4)
+                            VerificationCodeBox(controller: _code4),
+                            VerificationCodeBox(controller: _code5),
+                            VerificationCodeBox(controller: _code6),
                           ],
                         ),
-                        const SizedBox(
-                          height: 30,
-                        ),
+                        const SizedBox(height: 30),
                         defaultBtn(
-                          text: "Continuer",
+                          text: _isLoading ? "Vérification..." : "Continuer",
                           btnColor: AppColors.orange,
-                          onPress: _isLoading
-                              ? null
-                              : () async {
-                                  // Ajoutez 'async' ici
-                                  // Logique pour la vérification du code
-                                  final code = _code1.text +
-                                      _code2.text +
-                                      _code3.text +
-                                      _code4.text;
-                                  print("Code saisi: $code");
-
-                                  // Appel de la fonction de vérification
-                                  await _verifyCode(); // Ceci est maintenant correct
-                                },
+                          onPress: _isLoading ? null : _verifyOTP,
                         ),
                       ],
                     ),

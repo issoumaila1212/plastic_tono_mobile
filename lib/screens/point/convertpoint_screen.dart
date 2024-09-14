@@ -1,8 +1,13 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:plastic_tono/themes/color/app_colors.dart';
 import 'package:plastic_tono/screens/point/point_screen.dart';
 import '../../components/default_btn.dart'; // Assurez-vous d'importer correctement vos widgets personnalisés
 import '../../widgets/input.dart'; // Assurez-vous d'importer le widget `input` si nécessaire
+
+import 'PointsService.dart';
+
 
 class ConvertPointsScreen extends StatefulWidget {
   const ConvertPointsScreen({super.key});
@@ -10,10 +15,52 @@ class ConvertPointsScreen extends StatefulWidget {
   @override
   State<ConvertPointsScreen> createState() => _ConvertPointsScreenState();
 }
+/*class ConvertPointsViewModel extends ChangeNotifier {
+  int? availablePoints;
+  bool isLoading = true;
+  final PointsService _pointsService = PointsService();
+
+  Future<void> loadUserPoints() async {
+    try {
+      availablePoints = await _pointsService.fetchUserPoints();
+    } catch (e) {
+      // Gérer les erreurs
+      availablePoints = 0;
+    }
+    isLoading = false;
+    notifyListeners(); // Notifie les widgets consommateurs d'un changement
+  }
+}*/
 
 class _ConvertPointsScreenState extends State<ConvertPointsScreen> {
+  double availablePoints=0;
+  bool isLoading = true;
+  String pt="";
+
+  final PointsService _pointsService = PointsService();
   bool showConversionFields =
-      false; // Booléen pour afficher les champs supplémentaires
+      false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserPoints();
+  }
+  Future<void> _loadUserPoints() async {
+    try{
+      double points = await _pointsService.fetchUserPoints();
+      setState(() {
+        availablePoints = points;
+        isLoading = false;
+      });
+    }catch(e){
+      setState(() {
+        availablePoints = 0;
+        isLoading = false;
+      });
+    }
+    pt=availablePoints.toStringAsFixed(2);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +84,7 @@ class _ConvertPointsScreenState extends State<ConvertPointsScreen> {
           },
         ),
       ),
+<<<<<<< Updated upstream
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -70,6 +118,45 @@ class _ConvertPointsScreenState extends State<ConvertPointsScreen> {
                             color: Colors.white,
                             fontSize: 30,
                             fontWeight: FontWeight.bold,
+=======
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            children: [
+              // Carte affichant les points disponibles
+              Card(
+                color: Colors.orange,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children:  [
+                          Text(
+                            'Points disponibles',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            pt != null
+                                ? '$pt'
+                                : '0',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                            ),
+>>>>>>> Stashed changes
                           ),
                         ),
                       ],
