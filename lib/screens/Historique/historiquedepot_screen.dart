@@ -1,47 +1,57 @@
+import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:plastic_tono/widgets/list_view_historique.dart'; // Assurez-vous d'importer correctement le fichier du widget
+import 'package:http/http.dart' as http;
+import 'package:plastic_tono/widgets/list_view_historique.dart';
 import 'package:plastic_tono/themes/color/app_colors.dart';
 import 'package:plastic_tono/screens/home/home_screen.dart';
 
 class HistoriqueDepotScreen extends StatelessWidget {
   const HistoriqueDepotScreen({super.key});
 
+
+  Future<String?> getUserId() async {
+    final User? user = FirebaseAuth.instance.currentUser;
+    return user?.uid;
+  }
+Future<List<Map<String, dynamic>>> fetchDepots() async {
+    final String? userId = await getUserId();
+
+    if (userId == null) {
+      throw Exception('Utilisateur non connecté');
+    }
+
+    print('User ID: $userId');
+
+    try {
+      final response = await http.get(
+         // Uri.parse('http://10.0.2.2:8080/session/historique/$userId'));
+            Uri.parse('http://192.168.43.99:8080/session/historique/$userId'));
+
+      if (response.statusCode == 200) {
+        // Convertir la réponse JSON en une liste de données de dépôts
+        List<dynamic> jsonResponse = json.decode(response.body);
+        return jsonResponse.map((depot) =>
+        {
+          "date": depot["dateDepot"],
+          "kiosque": depot["codeKiosque"],
+          "poids": "${depot['poids']} Kg",
+          "points": depot["points"]
+        }).toList();
+      } else {
+        print(response.statusCode);
+        return Future.value([]);
+        //throw Exception('Erreur lors du chargement des dépôts');
+      }
+    }
+    catch(e){
+      print(e);
+      return Future.value([]);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Simuler une liste de données de dépôts pour l'exemple
-    final List<Map<String, dynamic>> depots = [
-      {
-        "date": "10/12/2024",
-        "kiosque": "Kiosque1",
-        "poids": "2,5 Kg",
-        "points": 30
-      },
-      {
-        "date": "11/12/2024",
-        "kiosque": "Kiosque2",
-        "poids": "3,0 Kg",
-        "points": 25
-      },
-      {
-        "date": "12/12/2024",
-        "kiosque": "Kiosque3",
-        "poids": "1,5 Kg",
-        "points": 29
-      },
-      {
-        "date": "13/12/2024",
-        "kiosque": "Kiosque4",
-        "poids": "2,0 Kg",
-        "points": 22
-      },
-      {
-        "date": "14/12/2024",
-        "kiosque": "Kiosque5",
-        "poids": "2,8 Kg",
-        "points": 22
-      },
-    ];
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.deepGreen,
@@ -62,8 +72,22 @@ class HistoriqueDepotScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: HistoriqueDepotListView(
-          depots: depots), // Utiliser le widget ListView
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: fetchDepots(), // Appel de la fonction API
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Erreur: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('Aucun dépôt trouvé'));
+          } else {
+            return HistoriqueDepotListView(
+              depots: snapshot.data!,
+            );
+          }
+        },
+      ),
     );
   }
 }

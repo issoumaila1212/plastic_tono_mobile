@@ -1,0 +1,449 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:plastic_tono/screens/authentification/auth_sceen.dart'; // Assurez-vous que ce chemin est correct
+import 'package:plastic_tono/screens/authentification/validation_screen.dart';
+import 'package:plastic_tono/themes/color/app_colors.dart';
+import 'package:plastic_tono/themes/images/app_images.dart';
+
+import '../../components/default_btn.dart';
+import '../../widgets/input.dart';
+
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  TextEditingController nameCtrl = TextEditingController();
+  TextEditingController phoneCtrl = TextEditingController();
+  TextEditingController emailCtrl = TextEditingController();
+  TextEditingController passwordCtrl = TextEditingController();
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  bool isLoading = false; // Indicateur de chargement
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Container(
+            height: MediaQuery.of(context).size.height,
+            child: Column(
+              children: [
+                Container(
+                  height: 250,
+                  color: AppColors.white,
+                  child: Image.asset(
+                    AppImages.logo,
+                    width: 200,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    color: AppColors.deepGreen,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 20,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Text(
+                            "Créons votre compte",
+                            style: TextStyle(
+                              color: AppColors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Center(
+                          child: Text(
+                            "Créez votre compte gratuitement et valorisez vos déchets plastiques !",
+                            style: TextStyle(
+                              color: AppColors.white,
+                              fontSize: 16,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        input(
+                          phoneCtrl: nameCtrl, // Utilisation de nameCtrl pour le champ du nom
+                          icon: Icons.person,
+                          hintText: "Nom complet",
+                        ),
+                        const SizedBox(height: 10),
+                        input(
+                          phoneCtrl: phoneCtrl, // Utilisation de phoneCtrl pour le champ du numéro de téléphone
+                          icon: Icons.phone,
+                          hintText: "Numéro de téléphone",
+                        ),
+                        const SizedBox(height: 10),
+                        input(
+                          phoneCtrl: emailCtrl, // Utilisation de emailCtrl pour le champ de l'email
+                          icon: Icons.email,
+                          hintText: "Email",
+                        ),
+                        const SizedBox(height: 10),
+                        input(
+                          phoneCtrl: passwordCtrl, // Utilisation de passwordCtrl pour le champ du mot de passe
+                          icon: Icons.lock,
+                          hintText: "Mot de passe",
+                          isPassword: true,
+                        ),
+                        const SizedBox(height: 10),
+                        Center(
+                          child: defaultBtn(
+                            text: isLoading ? "Chargement..." : "Créer un compte",
+                            btnColor: Colors.orange,
+                            onPress: isLoading ? null : () async {
+                              // Valider les champs
+                              if (nameCtrl.text.isEmpty ||
+                                  phoneCtrl.text.isEmpty ||
+                                  emailCtrl.text.isEmpty ||
+                                  passwordCtrl.text.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text("Tous les champs sont obligatoires")),
+                                );
+                                return;
+                              }
+
+                              setState(() {
+                                isLoading = true;
+                              });
+
+                              try {
+                                // Créer l'utilisateur avec Firebase Authentication
+                                UserCredential userCredential = await _auth
+                                    .createUserWithEmailAndPassword(
+                                  email: emailCtrl.text.trim(),
+                                  password: passwordCtrl.text,
+                                );
+
+                                // Ajouter l'utilisateur dans Firestore
+                                await _firestore
+                                    .collection('mobile')
+                                    .doc(userCredential.user?.uid)
+                                    .set({
+                                  'name': nameCtrl.text,
+                                  'phone': phoneCtrl.text,
+                                  'email': emailCtrl.text,
+                                  'userId': userCredential.user?.uid,
+                                });
+
+                                print("Compte créé avec succès");
+
+                                // Naviguer vers l'écran de validation
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                      const AuthSceen()),
+                                );
+                              } catch (e) {
+                                String errorMessage;
+
+                                if (e is FirebaseAuthException) {
+                                  switch (e.code) {
+                                    case 'email-already-in-use':
+                                      errorMessage = "L'email est déjà utilisé par un autre compte.";
+                                      break;
+                                    case 'weak-password':
+                                      errorMessage = "Le mot de passe est trop faible.";
+                                      break;
+                                    case 'invalid-email':
+                                      errorMessage = "L'email n'est pas valide.";
+                                      break;
+                                    default:
+                                      errorMessage = "Erreur inconnue: ${e.message}";
+                                  }
+                                } else {
+                                  errorMessage = "Erreur lors de la création du compte: ${e.toString()}";
+                                }
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(errorMessage)),
+                                );
+
+                                print("Erreur lors de la création du compte : $e");
+                              } finally {
+                                setState(() {
+                                  isLoading = false;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Center(
+                          child: Text.rich(
+                            TextSpan(
+                              style: TextStyle(
+                                color: AppColors.white,
+                                fontSize: 12,
+                              ),
+                              text: "Si vous avez déjà un compte ? ",
+                              children: [
+                                WidgetSpan(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      // Naviguer vers AuthScreen
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                            const AuthSceen()),
+                                      );
+                                    },
+                                    child: Text(
+                                      "Connectez-vous",
+                                      style: TextStyle(
+                                        color: Colors.orange,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+
+/////////////////connexion
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:plastic_tono/screens/authentification/register_screen.dart';
+import 'package:plastic_tono/screens/authentification/validation_screen.dart';
+import 'package:plastic_tono/themes/color/app_colors.dart';
+import 'package:plastic_tono/themes/images/app_images.dart';
+import '../../components/default_btn.dart';
+import '../../widgets/input.dart';
+import '../home/home_screen.dart';
+
+class AuthSceen extends StatefulWidget {
+  const AuthSceen({super.key});
+
+  @override
+  State<AuthSceen> createState() => _AuthSceenState();
+}
+
+class _AuthSceenState extends State<AuthSceen> {
+  TextEditingController phoneCtrl = TextEditingController();
+  //TextEditingController passwordCtrl = TextEditingController();
+  bool isLoading = false; // Indicateur de chargement
+  final FirebaseAuth _auth = FirebaseAuth.instance; // Instance de FirebaseAuth
+
+  String? _verificationId;
+
+  @override
+  void initState() {
+    super.initState();
+
+
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Container(
+            height: MediaQuery.of(context).size.height,
+            child: Column(
+              children: [
+                Container(
+                  height: 250,
+                  color: AppColors.white,
+                  child: Image.asset(
+                    AppImages.logo,
+                    width: 200,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    color: AppColors.deepGreen,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Text(
+                            "Connexion",
+                            style: TextStyle(
+                              color: AppColors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        input(
+                          phoneCtrl: phoneCtrl,
+                          icon: Icons.phone,
+                          hintText: "Numéro de téléphone",
+                        ),
+                        const SizedBox(height: 10),
+                        /*input(
+                          phoneCtrl: passwordCtrl,
+                          icon: Icons.lock,
+                          hintText: "Mot de passe",
+                          isPassword: true,
+                        ),
+                        const SizedBox(height: 10),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            "Mot de passe oublié?",
+                            style: TextStyle(
+                              color: AppColors.white,
+                              fontSize: 13,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),*/
+                        const SizedBox(height: 20),
+                        Center(
+                          child: defaultBtn(
+                            text: isLoading ? "Se connecter..." : "Se connecter",
+                            btnColor: Colors.orange,
+                            onPress: isLoading
+                                ? null
+                                : () async {
+                              setState(() {
+                                isLoading = true;
+                              });
+
+                              try {
+                                await _auth.verifyPhoneNumber(
+                                  phoneNumber: phoneCtrl.text.trim(),
+                                  verificationCompleted: (PhoneAuthCredential credential) async {
+                                    await _auth.signInWithCredential(credential);
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => const HomeScreen()),
+                                    );
+                                  },
+                                  verificationFailed: (FirebaseAuthException e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text("Vérification échouée : ${e.message}")),
+                                    );
+                                  },
+                                  codeSent: (String verificationId, int? resendToken) {
+                                    setState(() {
+                                      _verificationId = verificationId;
+                                      isLoading = false;
+                                    });
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ValidationScreen(
+                                          verificationId: verificationId,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  codeAutoRetrievalTimeout: (String verificationId) {
+                                    // Gestion du délai d'expiration
+                                  },
+                                );
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text("Erreur de connexion : ${e.toString()}")),
+                                );
+                              } finally {
+                                setState(() {
+                                  isLoading = false;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+                        Center(
+                          child: Text.rich(
+                            TextSpan(
+                              style: TextStyle(
+                                color: AppColors.white,
+                                fontSize: 12,
+                              ),
+                              text: "Vous n'avez pas de compte ? ",
+                              children: [
+                                WidgetSpan(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                            const RegisterScreen()),
+                                      );
+                                    },
+                                    child: Text(
+                                      "Créer un compte",
+                                      style: TextStyle(
+                                        color: Colors.orange,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+
+
+
+

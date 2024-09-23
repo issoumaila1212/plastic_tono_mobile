@@ -11,10 +11,17 @@ class HistoriqueDepotListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+
     return ListView.builder(
       itemCount: depots.length,
       itemBuilder: (context, index) {
         final depot = depots[index];
+        double v=depot['points'] as double;
+
+        String pt=v.toStringAsFixed(2); // '2.35'
+
+
         return Card(
           elevation: 2,
           margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -55,7 +62,8 @@ class HistoriqueDepotListView extends StatelessWidget {
                   ],
                 ),
                 Text(
-                  '${depot['points']} points',
+                  '${pt} points' // '2.35'
+                  ,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

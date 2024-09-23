@@ -8,12 +8,20 @@ class input extends StatefulWidget {
     required this.hintText,
     this.icon,
     this.isPassword = false,
+    this.isPhone = false,
+    this.isName = false,
+    this.isEmail = false,
   });
 
   final TextEditingController phoneCtrl;
   final String hintText;
   final IconData? icon;
   final bool isPassword;
+
+  final bool isPhone;
+  final bool isName;
+  final bool isEmail;
+
 
   @override
   State<input> createState() => _inputState();
@@ -28,6 +36,21 @@ class _inputState extends State<input> {
     obscureText = widget.isPassword;
   }
 
+  // methode pour connaitre le type de champ
+  TextInputType _getKeyboardType() {
+    if (widget.isPhone) {
+      return TextInputType.phone;
+    } else if (widget.isEmail) {
+      return TextInputType.emailAddress;
+    } else if (widget.isName) {
+      return TextInputType.name;
+    } else if (widget.isPassword) {
+      return TextInputType.text;
+    } else {
+      return TextInputType.text;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -36,6 +59,7 @@ class _inputState extends State<input> {
       child: TextFormField(
         controller: widget.phoneCtrl,
         obscureText: obscureText,
+        keyboardType: _getKeyboardType(),
         decoration: InputDecoration(
           hintText: widget.hintText,
           fillColor: AppColors.white,

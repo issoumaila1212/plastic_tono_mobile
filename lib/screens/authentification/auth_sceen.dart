@@ -1,25 +1,54 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:plastic_tono/screens/authentification/register_screen.dart'; // Assurez-vous que ce chemin est correct
+import 'package:plastic_tono/screens/authentification/register_screen.dart';
+import 'package:plastic_tono/screens/authentification/success_screen.dart';
+import 'package:plastic_tono/screens/authentification/validation_screen.dart'; // Remplacez ou supprimez si non nécessaire
 import 'package:plastic_tono/themes/color/app_colors.dart';
-import 'package:plastic_tono/themes/images/app_images.dart';
-
 import '../../components/default_btn.dart';
+import '../../themes/images/app_images.dart';
 import '../../widgets/input.dart';
+import 'UserService.dart';
+import '../home/home_screen.dart'; // Importer l'écran de destination après connexion
 
-class AuthSceen extends StatefulWidget {
-  const AuthSceen({super.key});
+class AuthScreen extends StatefulWidget {
+  const AuthScreen({super.key});
 
   @override
-  State<AuthSceen> createState() => _AuthSceenState();
+  State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthSceenState extends State<AuthSceen> {
-  TextEditingController phoneCtrl = TextEditingController();
-  TextEditingController passwordCtrl = TextEditingController();
+class _AuthScreenState extends State<AuthScreen> {
+  final TextEditingController emailCtrl = TextEditingController();
+  final TextEditingController passwordCtrl = TextEditingController();
+  final UserService _userService = UserService();
+  bool isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
+  void _handleSignIn() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    User? user = await _userService.signIn(
+      emailCtrl.text.trim(),
+      passwordCtrl.text.trim(),
+    );
+
+    if (user != null) {
+      // Si la connexion est réussie, naviguez vers l'écran d'accueil
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const SuccessScreen()),
+      );
+    } else {
+      // Affiche un message d'erreur si la connexion échoue
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Erreur de connexion. Vérifiez vos identifiants.")),
+      );
+    }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
@@ -45,8 +74,7 @@ class _AuthSceenState extends State<AuthSceen> {
                   child: Container(
                     width: double.infinity,
                     color: AppColors.deepGreen,
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 20, horizontal: 20),
+                    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -62,65 +90,38 @@ class _AuthSceenState extends State<AuthSceen> {
                         ),
                         const SizedBox(height: 20),
                         input(
-                          phoneCtrl: phoneCtrl,
-                          icon: Icons.phone,
-                          hintText: "Numéro de téléphone",
+                          phoneCtrl: emailCtrl,
+                          icon: Icons.email,
+                          hintText: "Email",
                         ),
-                        const SizedBox(
-                            height: 10), // Espace entre les champs de saisie
+                        const SizedBox(height: 10),
                         input(
                           phoneCtrl: passwordCtrl,
                           icon: Icons.lock,
                           hintText: "Mot de passe",
                           isPassword: true,
                         ),
-                        const SizedBox(height: 10),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            "Mot de passe oublié?",
-                            style: TextStyle(
-                              color: AppColors.white,
-                              fontSize: 13,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                        ),
                         const SizedBox(height: 20),
                         Center(
                           child: defaultBtn(
-                            text: "Se connecter",
+                            text: isLoading ? "Connexion en cours..." : "Se connecter",
                             btnColor: Colors.orange,
-                            onPress: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const RegisterScreen()),
-                              );
-                              // Ajoutez votre logique de connexion ici
-                            },
+                            onPress: isLoading ? null : _handleSignIn,
                           ),
                         ),
                         const SizedBox(height: 20),
                         Center(
                           child: Text.rich(
                             TextSpan(
-                              style: TextStyle(
-                                color: AppColors.white,
-                                fontSize: 12,
-                              ),
+                              style: TextStyle(color: AppColors.white, fontSize: 12),
                               text: "Vous n'avez pas de compte ? ",
                               children: [
                                 WidgetSpan(
                                   child: GestureDetector(
                                     onTap: () {
-                                      // Naviguer vers RegisterScreen
                                       Navigator.push(
                                         context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                const RegisterScreen()),
+                                        MaterialPageRoute(builder: (context) => const RegisterScreen()),
                                       );
                                     },
                                     child: Text(

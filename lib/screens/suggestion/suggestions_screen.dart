@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:plastic_tono/themes/color/app_colors.dart';
 import 'package:plastic_tono/themes/images/app_images.dart';
+import 'package:http/http.dart' as http;
 import '../../components/default_btn.dart';
 
 class SuggestionsScreen extends StatefulWidget {
@@ -17,6 +19,38 @@ class _SuggestionsScreenState extends State<SuggestionsScreen> {
   void dispose() {
     _suggestionsController.dispose();
     super.dispose();
+  }
+
+  static const String baseUrl = 'http://192.168.43.99:8080/Suggestions/create';
+
+  Future<void> addSuggestion(String texte) async {
+    try {
+      final response = await http.post(
+        Uri.parse(baseUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'texte': texte}),
+      );
+
+      if (response.statusCode == 201) {
+        // Success feedback
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Suggestion envoyée avec succès!')),
+        );
+        _suggestionsController.clear();
+      } else {
+        // Error feedback
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: ${response.statusCode}. Réessayez.'),
+          ),
+        );
+      }
+    } catch (e) {
+      // Handle network or other errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erreur réseau. Réessayez.')),
+      );
+    }
   }
 
   @override
@@ -41,14 +75,12 @@ class _SuggestionsScreenState extends State<SuggestionsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Icones de suggestion
             Icon(
               Icons.sentiment_satisfied_alt,
               size: 100,
               color: AppColors.deepGreen,
             ),
             const SizedBox(height: 20),
-            // Card pour suggestions
             Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -67,7 +99,6 @@ class _SuggestionsScreenState extends State<SuggestionsScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    // Champ de saisie de texte pour les suggestions
                     TextField(
                       controller: _suggestionsController,
                       maxLines: 4,
@@ -82,16 +113,17 @@ class _SuggestionsScreenState extends State<SuggestionsScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    // Bouton Envoyer
                     defaultBtn(
                       text: 'Envoyez',
                       btnColor: AppColors.deepGreen,
                       onPress: () {
-                        // Logique pour envoyer la suggestion
+
                         if (_suggestionsController.text.isNotEmpty) {
+                          addSuggestion(_suggestionsController.text);
+                        } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Suggestion envoyée!'),
+                              content: Text('Veuillez écrire une suggestion.'),
                             ),
                           );
                         }
@@ -102,7 +134,6 @@ class _SuggestionsScreenState extends State<SuggestionsScreen> {
               ),
             ),
             const SizedBox(height: 30),
-            // Logo en bas de la page
             Image.asset(
               AppImages.logo,
               height: 150,

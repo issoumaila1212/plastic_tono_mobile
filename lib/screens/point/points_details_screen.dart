@@ -32,9 +32,9 @@ class PointsDetailsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: ListView(
           children: const [
-            PointsDetailCard(points: 10, reward: '1000F'),
-            PointsDetailCard(points: 20, reward: '2 GO de forfait'),
-            PointsDetailCard(points: 40, reward: '1000F'),
+            PointsDetailCard(points: 1, reward: '15Fcfa'),
+            PointsDetailCard(points: 2, reward: '30f'),
+            PointsDetailCard(points: 3, reward: '45f'),
             PointsDetailCard(points: 50, reward: '15000F'),
             PointsDetailCard(points: 40, reward: '1000F'),
             PointsDetailCard(points: 10, reward: '1000F'),
