@@ -224,9 +224,16 @@ class _ConvertPointsScreenState extends State<ConvertPointsScreen> {
   String pt = "";
 
   final PointsService _pointsService = PointsService();
-  final TextEditingController pointsCtrl = TextEditingController();
   final TextEditingController phoneCtrl = TextEditingController();
   bool showConversionFields = false;
+
+  // Liste des options de conversion
+  final Map<int, String> conversionOptions = {
+    250: '250 points = 500 FCFA',
+    1000: '1000 points = 2000 FCFA',
+    3000: '3000 points = 5000 FCFA de bon d\'achats',
+  };
+  int? selectedPoints;
 
   @override
   void initState() {
@@ -334,7 +341,8 @@ class _ConvertPointsScreenState extends State<ConvertPointsScreen> {
                 btnColor: AppColors.deepGreen,
                 onPress: () {
                   setState(() {
-                    showConversionFields = true; // Afficher les champs supplémentaires
+                    showConversionFields =
+                        true; // Afficher les champs supplémentaires
                   });
                 },
               ),
@@ -347,11 +355,22 @@ class _ConvertPointsScreenState extends State<ConvertPointsScreen> {
                   icon: Icons.phone_iphone,
                 ),
                 const SizedBox(height: 16),
-                // Champ de saisie "Nombre de points à convertir"
-                input(
-                  phoneCtrl: pointsCtrl,
-                  hintText: 'Nombre de points à convertir',
-                  icon: Icons.calculate,
+                // Sélecteur pour les options de conversion
+                DropdownButton<int>(
+                  isExpanded: true,
+                  hint: const Text('Choisir le nombre de points à convertir'),
+                  value: selectedPoints,
+                  items: conversionOptions.keys.map((int points) {
+                    return DropdownMenuItem<int>(
+                      value: points,
+                      child: Text(conversionOptions[points]!),
+                    );
+                  }).toList(),
+                  onChanged: (int? value) {
+                    setState(() {
+                      selectedPoints = value;
+                    });
+                  },
                 ),
                 const SizedBox(height: 16),
                 // Bouton "Confirmer"
@@ -359,14 +378,13 @@ class _ConvertPointsScreenState extends State<ConvertPointsScreen> {
                   text: 'Confirmer',
                   btnColor: AppColors.deepGreen,
                   onPress: () async {
-                    String pointsStr = pointsCtrl.text;
-
-                    if (pointsStr.isNotEmpty) {
-                      double points = double.parse(pointsStr);
+                    if (selectedPoints != null) {
+                      double points = selectedPoints!.toDouble();
 
                       if (points > availablePoints) {
                         // Afficher un message d'erreur si les points à convertir dépassent les points disponibles
-                        _showSnackBar(context, 'Erreur: points insuffisants.', Colors.red);
+                        _showSnackBar(context, 'Erreur: points insuffisants.',
+                            Colors.red);
                       } else {
                         try {
                           // Logique pour envoyer les données à l'API de conversion
@@ -375,25 +393,31 @@ class _ConvertPointsScreenState extends State<ConvertPointsScreen> {
                           // Soustraire les points convertis des points disponibles
                           setState(() {
                             availablePoints -= points;
-                            pt = availablePoints.toStringAsFixed(2); // Mettre à jour l'affichage
+                            pt = availablePoints.toStringAsFixed(
+                                2); // Mettre à jour l'affichage
                           });
 
                           // Afficher un message de succès
-                          _showSnackBar(context, 'Conversion réussie!', Colors.green);
+                          _showSnackBar(
+                              context, 'Conversion réussie!', Colors.green);
 
                           // Vider les champs
-                          pointsCtrl.clear();
                           phoneCtrl.clear();
+                          setState(() {
+                            selectedPoints = null;
+                          });
 
                           // Recharger les points disponibles
                           _loadUserPoints();
                         } catch (e) {
                           // Afficher un message d'erreur
-                          _showSnackBar(context, 'Erreur lors de la conversion.', Colors.red);
+                          _showSnackBar(context,
+                              'Erreur lors de la conversion.', Colors.red);
                         }
                       }
                     } else {
-                      _showSnackBar(context, 'Veuillez entrer toutes les informations.', Colors.orange);
+                      _showSnackBar(context,
+                          'Veuillez sélectionner une option.', Colors.orange);
                     }
                   },
                 ),
@@ -405,4 +429,3 @@ class _ConvertPointsScreenState extends State<ConvertPointsScreen> {
     );
   }
 }
-
